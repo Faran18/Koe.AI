@@ -14,8 +14,6 @@ class GroqClient(LLMClient):
     def __init__(self):
         self.client = AsyncOpenAI(
             api_key=settings.groq_api_key,
-            # api_key=os.environ["GROQ_API_KEY"],
-            # api_key = "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"
             base_url="https://api.groq.com/openai/v1",
         )
         self.model = settings.groq_model
