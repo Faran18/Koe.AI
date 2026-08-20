@@ -711,12 +711,6 @@ See the [LICENSE](LICENSE) file for details.
 
 ---
 
-# 👨‍💻 Author
-
-**Muhammad Ahsan**
-
-AI Engineer | Generative AI | Agentic AI | LLM Applications
-
 ---
 
 ⭐ If you find **Koe.AI** interesting, consider giving the repository a star.
