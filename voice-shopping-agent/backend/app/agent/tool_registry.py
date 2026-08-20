@@ -1,9 +1,20 @@
 # backend/app/agent/tool_registry.py
-from .tools import SearchProducts, GetFilters
+from .tools import SearchProducts, GetFilters , GetProductDetails , ListCategories , ViewCart , AddToCart , UpdateCartItem , RemoveFromCart , ListOrders , GetOrder , Checkout , UpdateOrderStatus , CancelOrder
 
 TOOLS = {
     "search_products": SearchProducts,
     "get_filters": GetFilters,
+    "get_product_details": GetProductDetails,
+    "list_categories": ListCategories,
+    "view_cart": ViewCart,
+    "add_to_cart": AddToCart,
+    "update_cart_item": UpdateCartItem,
+    "remove_from_cart": RemoveFromCart,
+    "list_orders": ListOrders,
+    "get_order": GetOrder,
+    "checkout": Checkout,
+    "update_order_status": UpdateOrderStatus,
+    "cancel_order": CancelOrder,
 }
 
 def get_llm_tool_specs() -> list[dict]:
