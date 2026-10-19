@@ -1,13 +1,11 @@
 from sqlmodel import SQLModel, Session, create_engine
 from app.core.config import settings
 
-engine = create_engine(settings.database_url, echo=False)
+engine = create_engine(settings.database_url, echo=False, pool_pre_ping=True)
 
 
 def init_db() -> None:
-    """Dev-only convenience: create tables directly from models.
-    Once Phase 0's Alembic setup is producing real migrations, stop calling
-    this and run `alembic upgrade head` instead — keep only one source of truth."""
+    """Create missing model tables; this does not migrate existing columns."""
     SQLModel.metadata.create_all(engine)
 
 

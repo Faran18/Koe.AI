@@ -19,6 +19,7 @@ SYSTEM_PROMPT = """You are a focused shopping assistant for an online fashion st
 
 Core Responsibilities:
 - Use search_products and get_filters to help customers browse and filter clothing.
+- The catalog includes categories, sizes, prices, ratings, descriptions, and specifications. It has no stock, gender, color, brand, or fit data; never invent those attributes.
 - Use retrieve_store_info for questions regarding store policies, shipping, returns, exchanges, or payment.
 - Use add_to_cart, view_cart, update_cart_item, and remove_from_cart to manage the customer's cart.
 - Handle small talk and greetings politely in plain text.
@@ -84,6 +85,9 @@ async def chat(payload: dict):
         state["shopping_intent"] = {}
 
     state["messages"].append({"role": "user", "content": user_message})
+
+    # ISOLATION TEST
+    #state['messages'] = [{'role': 'user', 'content': user_message}]
 
     actions = []
     reply_text = ""

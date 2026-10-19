@@ -23,12 +23,15 @@ def _serialize_order(session: Session, order: Order) -> OrderRead:
     item_reads = []
     for item in items:
         product = session.get(Product, item.product_id)
+        if not product:
+            raise HTTPException(status_code=409, detail="An order product is no longer available")
         line_total = item.price_at_purchase * item.quantity
         item_reads.append(
             OrderItemRead(
                 id=item.id,
                 product=product,
                 quantity=item.quantity,
+                size=item.size,
                 price_at_purchase=item.price_at_purchase,
                 line_total=line_total,
             )
@@ -93,19 +96,18 @@ def create_order(payload: OrderCreate, session: Session = Depends(get_session)):
     if not cart_items:
         raise HTTPException(status_code=400, detail="Cart is empty — nothing to order")
 
-    # Validate stock for every line BEFORE writing anything, so a failure
-    # partway through never leaves stock decremented for only some items.
     products_by_id = {}
+    currencies = set()
     for ci in cart_items:
         product = session.get(Product, ci.product_id)
         if not product:
             raise HTTPException(status_code=404, detail=f"Product {ci.product_id} no longer exists")
-        if product.stock < ci.quantity:
-            raise HTTPException(
-                status_code=409,
-                detail=f"Only {product.stock} left in stock for '{product.name}'",
-            )
+        if product.final_price is None and product.initial_price is None:
+            raise HTTPException(status_code=409, detail=f"Product {ci.product_id} no longer has a price")
+        currencies.add(product.currency or "USD")
         products_by_id[ci.product_id] = product
+    if len(currencies) > 1:
+        raise HTTPException(status_code=409, detail="A cart cannot be checked out across currencies")
 
     subtotal = sum(products_by_id[ci.product_id].price * ci.quantity for ci in cart_items)
 
@@ -119,13 +121,12 @@ def create_order(payload: OrderCreate, session: Session = Depends(get_session)):
         session.add(
             OrderItem(
                 order_id=order.id,
-                product_id=product.id,
+                product_id=product.product_id,
+                size=ci.size,
                 quantity=ci.quantity,
-                price_at_purchase=product.price,  # snapshot — future price changes don't affect this order
+                price_at_purchase=product.price,
             )
         )
-        product.stock -= ci.quantity
-        session.add(product)
 
     # Clear the cart now that it's been converted into an order — leave the
     # Cart row itself intact so the guest keeps a single stable cart id.
@@ -157,21 +158,12 @@ def update_order_status(order_id: uuid.UUID, payload: OrderStatusUpdate, session
 
 @router.delete("/{order_id}", response_model=OrderRead)
 def cancel_order(order_id: uuid.UUID, session: Session = Depends(get_session)):
-    """"Delete" here means cancel-and-restock, not a hard row delete — that's
-    the correct real-world behavior for an order (you keep the record), even
-    though the verb is DELETE for REST/CRUD consistency with the other routers."""
+    """"Delete" marks the order as cancelled without deleting its history."""
     order = session.get(Order, order_id)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     if order.status not in ("pending", "confirmed"):
         raise HTTPException(status_code=409, detail=f"Cannot cancel an order that is already '{order.status}'")
-
-    items = session.exec(select(OrderItem).where(OrderItem.order_id == order.id)).all()
-    for item in items:
-        product = session.get(Product, item.product_id)
-        if product:
-            product.stock += item.quantity
-            session.add(product)
 
     order.status = "cancelled"
     order.updated_at = datetime.utcnow()

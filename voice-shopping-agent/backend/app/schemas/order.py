@@ -21,8 +21,9 @@ class OrderItemRead(BaseModel):
     id: uuid.UUID
     product: ProductRead
     quantity: int
-    price_at_purchase: int
-    line_total: int  # price_at_purchase * quantity — computed, not stored
+    size: Optional[str]
+    price_at_purchase: float
+    line_total: float
 
     class Config:
         from_attributes = True
@@ -31,7 +32,7 @@ class OrderItemRead(BaseModel):
 class OrderRead(BaseModel):
     id: uuid.UUID
     status: str
-    subtotal: int
+    subtotal: float
     shipping_address: Optional[str]
     created_at: datetime
     updated_at: datetime

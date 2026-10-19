@@ -21,26 +21,25 @@ async def run_eval():
         ),
         (
             "Turn 2: Tool Call (Filters)",
-            "What colors of men shirts do you have?",
+            "What product categories do you have?",
             lambda r: (
-                "black" in r.lower()
-                or "white" in r.lower()
-                or "beige" in r.lower()
+                "category" in r.lower()
+                or "collection" in r.lower()
+                or "available" in r.lower()
             ),
         ),
         (
             "Turn 3: Product Search",
-            "Show me black shirts under 5000",
+            "Show me some products from the catalog",
             lambda r: (
-                "shirt" in r.lower()
-                or "black" in r.lower()
-                or "flannel" in r.lower()
-                or "oxford" in r.lower()
+                "product" in r.lower()
+                or "collection" in r.lower()
+                or "item" in r.lower()
             ),
         ),
         (
             "Turn 4: Add Discovered Item",
-            "Add the third one to my cart with size M",
+            "Add the first item to my cart in one of its available sizes",
             lambda r: (
                 "cart" in r.lower()
                 or "added" in r.lower()

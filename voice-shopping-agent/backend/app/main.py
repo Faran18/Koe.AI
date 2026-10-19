@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import init_db
-from app.routers import products, categories, filters, cart, orders , chat
+from app.routers import products, categories, filters, cart, orders, chat, voice
 
 app = FastAPI(title="Voice Shopping Agent — Store API", version="0.1.0")
 
@@ -20,6 +20,7 @@ app.include_router(filters.router)
 app.include_router(cart.router)
 app.include_router(orders.router)
 app.include_router(chat.router, tags=["chat"])
+app.include_router(voice.router, tags=["voice"])
 
 
 @app.on_event("startup")
@@ -29,4 +30,4 @@ def on_startup():
 
 @app.get("/")
 def health():
-    return {"status": "ok", "phase": "1 — plain e-commerce, no AI"}
+    return {"status": "ok", "phase": "e-commerce, concierge, and voice"}

@@ -3,27 +3,26 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 class SearchProducts(BaseModel):
-    """Search products by keyword, category, gender, and filters. Use this
+    """Search products by keyword, category, size, price, and rating. Use this
     whenever the customer describes what they're looking for."""
     q: Optional[str] = Field(None, description="Free-text search keyword")
-    category: Optional[str] = Field(None, description="Category slug, e.g. 'shirts'")
-    gender: Optional[str] = Field(None, description="'men' or 'women'")
-    color: Optional[str] = None
+    category: Optional[str] = Field(None, description="Category group or subcategory from the catalog")
+    subcategory: Optional[str] = None
     size: Optional[str] = None
-    fit: Optional[str] = None
-    brand: Optional[str] = None
-    min_price: Optional[int] = None
-    max_price: Optional[int] = None
+    currency: Optional[str] = None
+    min_price: Optional[float] = None
+    max_price: Optional[float] = None
+    min_rating: Optional[float] = None
     page: int = Field(1, description="Page number, default 1")
     page_size: int = Field(24, description="Results per page, default 24")
 
 class GetFilters(BaseModel):
-    """Get the available filter options (colors, sizes, fits, brands, price
-    range) scoped to a category/gender. Use this if you need to know what
-    filter values actually exist before applying one, e.g. to check whether
-    'navy' is a valid color before searching for it."""
+    """Get the available filter options (categories, subcategories, sizes, price
+    range) scoped to a category/subcategory. Use this if you need to know what
+    filter values actually exist before applying one."""
     category: Optional[str] = None
-    gender: Optional[str] = None
+    subcategory: Optional[str] = None
+    currency: Optional[str] = None
 
 
 # --- products ---------------------------------------------------------
@@ -33,16 +32,13 @@ class GetProductDetails(BaseModel):
     customer asks for more info about one specific item they've already
     seen in a search result — never invent a product_id from memory, always
     copy it from a previous search_products or cart/order tool result."""
-    product_id: str = Field(..., description="UUID of the product, copied from a prior tool result")
+    product_id: str = Field(..., description="Dataset product_id copied from a prior tool result")
 
 
 # --- categories ---------------------------------------------------------
 
 class ListCategories(BaseModel):
-    """List available store categories, optionally scoped to a gender. Use
-    this if the customer asks what's available to browse, e.g. 'what
-    categories do you have for men?'"""
-    gender: Optional[str] = Field(None, description="'men' or 'women'")
+    """List available catalog categories when the customer asks what's available."""
 
 
 # --- cart ---------------------------------------------------------
@@ -59,8 +55,9 @@ class AddToCart(BaseModel):
     in the cart. Use this only after the customer has confirmed which exact
     product they want — don't guess a product_id, copy it from a prior
     search_products or get_product_details result."""
-    product_id: str = Field(..., description="UUID of the product to add, copied from a prior tool result")
+    product_id: str = Field(..., description="Dataset product_id copied from a prior tool result")
     quantity: int = Field(1, description="How many to add, default 1")
+    size: Optional[str] = Field(None, description="One of the product's listed sizes, when applicable")
 
 
 class UpdateCartItem(BaseModel):
@@ -116,7 +113,20 @@ class UpdateOrderStatus(BaseModel):
 
 
 class CancelOrder(BaseModel):
-    """Cancel an existing order and restock its items. Only works while the
+    """Cancel an existing order. Only works while the
     order is still 'pending' or 'confirmed' — use this when the customer
     explicitly asks to cancel, never as a default action."""
     order_id: str = Field(..., description="UUID of the order, copied from a prior tool result")
+
+
+# --- retrieval-info ---------------------------------------------------------
+class RetrieveStoreInfo(BaseModel):
+    """Look up store policies, FAQs, shipping, returns, exchanges, or payment
+    info. Use this for any question about store policy — NOT for product
+    search."""
+    query: str = Field(..., description="The customer's question, in their own words")
+    topic: Optional[str] = Field(
+        None,
+        description="One of: 'returns', 'shipping', 'exchange', 'payment' — "
+                    "pick the closest match based on the question, or omit if unsure"
+    )

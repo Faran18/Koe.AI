@@ -15,14 +15,14 @@ def trim_product_list_for_llm(data: dict, max_items: int = 5) -> dict:
     items = data.get("items", [])
     trimmed = [
         {
-            "id": p.get("id"),
-            "name": p.get("name"),
+            "product_id": p.get("product_id"),
+            "name": p.get("name") or p.get("title"),
             "price": p.get("price"),
-            "color": p.get("color"),
-            "size": p.get("size"),
-            "fit": p.get("fit"),
-            "brand": p.get("brand"),
-            "stock": p.get("stock"),
+            "currency": p.get("currency"),
+            "category_group": p.get("category_group"),
+            "subcategory": p.get("subcategory"),
+            "sizes": p.get("sizes"),
+            "rating": p.get("rating"),
         }
         for p in items[:max_items]
     ]
@@ -41,11 +41,11 @@ def trim_cart_for_llm(cart_data: dict) -> dict:
     trimmed_items = [
         {
             "item_id": item.get("id"),
-            "product_id": (item.get("product") or {}).get("id")
+            "product_id": (item.get("product") or {}).get("product_id")
+            or (item.get("product") or {}).get("id")
             or item.get("product_id"),
             "product_name": (item.get("product") or {}).get("name"),
-            "size": (item.get("product") or {}).get("size"),
-            "color": (item.get("product") or {}).get("color"),
+            "size": item.get("size"),
             "quantity": item.get("quantity"),
             "line_total": item.get("line_total"),
         }
@@ -124,19 +124,21 @@ async def execute_tool(tool_name: str, raw_args: dict) -> dict:
 
             # --- Order Endpoints ---
             elif tool_name == "list_orders":
-                r = await client.get("/api/orders")
+                r = await client.get("/api/orders", params=params)
+
             elif tool_name == "get_order":
                 r = await client.get(f"/api/orders/{params['order_id']}")
+
             elif tool_name == "checkout":
-                r = await client.post("/api/orders/checkout", json=params)
+                r = await client.post("/api/orders", json=params)
+
             elif tool_name == "update_order_status":
-                r = await client.put(
-                    f"/api/orders/{params['order_id']}/status", json=params
-                )
+                order_id = params.pop("order_id")
+                r = await client.patch(f"/api/orders/{order_id}", json=params)
+
             elif tool_name == "cancel_order":
-                r = await client.post(
-                    f"/api/orders/{params['order_id']}/cancel"
-                )
+                r = await client.delete(f"/api/orders/{params['order_id']}")
+
             else:
                 return {"error": f"no dispatch logic for {tool_name}"}
 

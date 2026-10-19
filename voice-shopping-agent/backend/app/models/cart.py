@@ -1,10 +1,7 @@
 import uuid
 from datetime import datetime
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
-
-if TYPE_CHECKING:
-    from app.models.product import Product
 
 
 class Cart(SQLModel, table=True):
@@ -22,9 +19,9 @@ class CartItem(SQLModel, table=True):
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     cart_id: uuid.UUID = Field(foreign_key="cart.id", index=True)
-    product_id: uuid.UUID = Field(foreign_key="products.id", index=True)
+    product_id: str = Field(foreign_key="products.product_id", index=True)
+    size: Optional[str] = Field(default=None)
     quantity: int = Field(default=1)
     added_at: datetime = Field(default_factory=datetime.utcnow)
 
     cart: Optional["Cart"] = Relationship(back_populates="items")
-    product: Optional["Product"] = Relationship(back_populates="cart_items")

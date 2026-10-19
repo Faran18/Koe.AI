@@ -3,7 +3,7 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 
 from app.core.config import settings
-from app.models import Category, Product, User, Cart, CartItem  # noqa: F401 — registers tables on metadata
+from app.models import Product, User, Cart, CartItem, Order, OrderItem  # noqa: F401 — registers tables on metadata
 from sqlmodel import SQLModel
 
 config = context.config

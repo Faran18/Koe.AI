@@ -9,3 +9,5 @@ pydantic-settings==2.5.2
 python-dotenv==1.0.1
 faker==28.4.1
 redis==5.0.8
+openai==1.51.2
+python-multipart==0.0.12

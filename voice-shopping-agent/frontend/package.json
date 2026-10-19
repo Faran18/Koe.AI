@@ -1,5 +1,5 @@
 {
-  "name": "voice-shopping-agent-frontend",
+  "name": "velora",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,17 +9,24 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "14.2.15",
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zustand": "^5.0.0",
+    "framer-motion": "^11.11.0",
+    "gsap": "^3.12.5",
+    "lenis": "^1.1.13",
+    "three": "^0.170.0",
+    "@react-three/fiber": "^9.0.0",
+    "@react-three/drei": "^10.0.0",
+    "@supabase/supabase-js": "^2.45.0",
+    "@supabase/ssr": "^0.5.0"
   },
   "devDependencies": {
-    "typescript": "5.6.3",
-    "@types/node": "20.16.10",
-    "@types/react": "18.3.11",
-    "@types/react-dom": "18.3.0",
-    "tailwindcss": "3.4.13",
-    "postcss": "8.4.47",
-    "autoprefixer": "10.4.20"
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.170.0"
   }
 }
